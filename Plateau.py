@@ -37,7 +37,7 @@ class Plateau:
 
         # self.grille[1][1] = None
         # self.grille[6][4] = None
-        # self.grille[5][4] = Piece.Piece("roi", "blanc")
+        # self.grille[0][1] = Piece.Piece("reine", "blanc")
 
     def getGrille(self):
         return self.grille
@@ -65,6 +65,10 @@ class Plateau:
                     ecran.blit(image, (j*80+20, i*80+8))
         pygame.display.flip()
 
+    def change_couleur(self, ecran):
+        pygame.draw.rect(ecran, (255, 0, 0), (80, 80, 80, 80))
+        print("yoo")
+        
     def affichage(self):
         for i in range(8):
             print(i, end=" : ")
@@ -138,7 +142,7 @@ class Plateau:
         for i in range(case[1]-1, -1, -1):
             if self.grille[case[0]][i] == None :
                 tab_coups.append((case[0],i))
-            elif self.grille[case[0]][case[1]].getCouleur() != self.grille[case[0]][1].getCouleur():
+            elif self.grille[case[0]][case[1]].getCouleur() != self.grille[case[0]][i].getCouleur():
                 tab_coups.append((case[0],i))
                 break
             else:
@@ -332,4 +336,9 @@ class Plateau:
     def coup(self,case1,case2):
         self.grille[case2[0]][case2[1]] = self.grille[case1[0]][case1[1]]
         self.grille[case1[0]][case1[1]] = None
-        
+    
+    def affiche_couleur(self,case):
+        if self.grille[case[0]][case[1]] == None:
+            return "case vide"
+        else:
+            return self.grille[case[0]][case[1]].getCouleur()

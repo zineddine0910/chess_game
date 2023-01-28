@@ -8,6 +8,7 @@ class Plateau:
     historique = []
     echec_et_mat_blanc = False
     echec_et_mat_noir = False
+    match_nul = False
     def __init__(self):
 
         # initialisation pieces blanches
@@ -38,8 +39,10 @@ class Plateau:
             self.grille[1][i] = Piece.Piece("pion", "noir")
             self.grille[6][i] = Piece.Piece("pion", "blanc")
 
-        #self.grille[5][4] = Piece.Piece("pion", "noir")
-        # self.grille[1][1] = None
+        # self.grille[6][6] = Piece.Piece("tour", "noir")
+        # self.grille[5][6] = Piece.Piece("roi", "blanc")
+        # print(self.case_vide_en_echec((4,6), "blanc"))
+        # print(self.coups_possibles((6,6)))
         # self.grille[6][4] = None
         # self.grille[0][1] = Piece.Piece("reine", "blanc")
 
@@ -89,39 +92,39 @@ class Plateau:
     def coups_possibles_pion(self,case,tab_coups):
         # pions blancs
         x, y = case[0], case[1]
-        if self.grille[x][y].getCouleur() == "blanc":
-            if x > 0:
-                if (self.grille[x-1][y] == None):
-                    tab_coups.append((x-1, y))
-            if x == 6:
-                if (self.grille[x-1][y] == None and self.grille[x-2][y] == None):
-                    tab_coups.append((x-2, y))
-            if (x > 0 and y > 0):
-                if (self.grille[x-1][y-1] != None):
-                    if (self.grille[x-1][y-1].getCouleur() == "noir"):
-                        tab_coups.append((x-1, y-1))
-            
-            if (x > 0 and y < 7):
-                if (self.grille[x-1][y+1] != None):
-                    if (self.grille[x-1][y+1].getCouleur() == "noir"):
-                        tab_coups.append((x-1, y+1))
+        couleur = self.grille[x][y].getCouleur()
+        if x > 0:
+            if (self.grille[x-1][y] == None):
+                tab_coups.append((x-1, y))
+        if x == 6:
+            if (self.grille[x-1][y] == None and self.grille[x-2][y] == None):
+                tab_coups.append((x-2, y))
+        if (x > 0 and y > 0):
+            if (self.grille[x-1][y-1] != None):
+                if (self.grille[x-1][y-1].getCouleur() != couleur):
+                    tab_coups.append((x-1, y-1))
+        
+        if (x > 0 and y < 7):
+            if (self.grille[x-1][y+1] != None):
+                if (self.grille[x-1][y+1].getCouleur() != couleur):
+                    tab_coups.append((x-1, y+1))
                         
-        else:
-            if x < 7:
-                if (self.grille[x+1][y] == None):
-                    tab_coups.append((x+1, y))
-            if x == 1:
-                if (self.grille[x+1][y] == None and self.grille[x+2][y] == None):
-                    tab_coups.append((x+2, y))
-            if (x < 7 and y > 0):
-                if (self.grille[x+1][y-1] != None):
-                    if (self.grille[x+1][y-1].getCouleur() == "blanc"):
-                        tab_coups.append((x+1, y-1))
+        # else:
+        #     if x < 7:
+        #         if (self.grille[x+1][y] == None):
+        #             tab_coups.append((x+1, y))
+        #     if x == 1:
+        #         if (self.grille[x+1][y] == None and self.grille[x+2][y] == None):
+        #             tab_coups.append((x+2, y))
+        #     if (x < 7 and y > 0):
+        #         if (self.grille[x+1][y-1] != None):
+        #             if (self.grille[x+1][y-1].getCouleur() == "blanc"):
+        #                 tab_coups.append((x+1, y-1))
                 
-            if (x < 7 and y < 7):
-                if (self.grille[x+1][y+1] != None):
-                    if (self.grille[x+1][y+1].getCouleur() == "blanc"):
-                        tab_coups.append((x+1, y+1))
+        #     if (x < 7 and y < 7):
+        #         if (self.grille[x+1][y+1] != None):
+        #             if (self.grille[x+1][y+1].getCouleur() == "blanc"):
+        #                 tab_coups.append((x+1, y+1))
 
     def coups_possibles_tour(self,case,tab_coups):
         # droite
@@ -280,18 +283,19 @@ class Plateau:
             ancienne_case, nouvelle_case, piece = self.historique.pop()
             self.grille[ancienne_case[0]][ancienne_case[1]] = self.grille[nouvelle_case[0]][nouvelle_case[1]]
             self.grille[nouvelle_case[0]][nouvelle_case[1]] = piece
+            
     def affiche_couleur(self,case):
         if self.grille[case[0]][case[1]] == None:
             return "case vide"
         else:
             return self.grille[case[0]][case[1]].getCouleur()
     
-    # def aucun_coup_dispo_IA(self, list):
+    def aucun_coup_dispo_IA(self, list):
         
-    #     for i in range(len(list)):
-    #         if self.coups_possibles(list[i]) != []:
-    #             return False
-    #     return True
+        for i in range(len(list)):
+            if self.coups_possibles(list[i]) != []:
+                return False
+        return True
     # def coup_IA(self):
     #     list = []
     #     list2 = []
@@ -320,17 +324,26 @@ class Plateau:
                     if self.grille[i][j] != None:
                         if self.grille[i][j].getCouleur() == "noir":
                             list.append((i, j))
-        
-        while(not list2):
-            for i in range(8):
-                for j in range(8):
-                    if self.grille[i][j] != None:
-                        if self.grille[i][j].getCouleur() == "noir":
-                            list.append((i, j))
+        while(list):
             case = random.choice(list)
             list2 = self.coups_possibles(case)
-        case2 = random.choice(list2)
-        self.coup(case, case2)
+            if self.grille[case[0]][case[1]].getNom() == "roi":
+                self.grille[case[0]][case[1]] = None
+                list2 = self.enleve_cases_roi(list2, "noir")
+                self.grille[case[0]][case[1]] = Piece.Piece("roi", "noir")
+            if list2 != []:
+                break
+            else: list.remove(case)
+        if list2 != []:
+            case2 = random.choice(list2)
+            self.coup(case, case2)
+            return
+        elif self.roi_en_echec("noir") == True:
+            self.echec_et_mat_noir = True
+            return
+        else:
+            self.match_nul = True
+            return
     
     def roi_en_echec(self, couleur): #verifie si un des rois est en echec
         x,y = -1,-1
@@ -343,17 +356,15 @@ class Plateau:
                 if (self.grille[i][j] != None and self.grille[i][j].getCouleur() != couleur):
                     if((x,y) in self.coups_possibles((i,j))):
                         return True
+        if(-1< x-1 < 8 and -1< y-1 < 8 and self.grille[x-1][y-1] != None and self.grille[x-1][y-1].getNom() == "pion" and self.grille[x-1][y-1].getCouleur() != couleur):
+            return True
+        if(-1< x-1 < 8 and -1< y+1 < 8 and self.grille[x-1][y+1] != None and self.grille[x-1][y+1].getNom() == "pion" and self.grille[x-1][y+1].getCouleur() != couleur):
+            return True
         return False
     
-    def enleve_cases_roi(self, tab_coups, couleur): #nleve les cases qui representeraient un echec et mat pour le roi
-        cpt = 0
-        arret = False
-        while not arret:
-            if self.case_vide_en_echec(tab_coups[cpt], couleur):
-                tab_coups.remove(tab_coups[cpt])
-            else: cpt = cpt+1
-            if cpt == len(tab_coups):
-                arret = True
+    def enleve_cases_roi(self, tab_coups, couleur): #enleve les cases qui representeraient un echec et mat pour le roi
+        new_list = [x for x in tab_coups if self.case_vide_en_echec(x, couleur) == False]
+        return new_list
                     
     def case_vide_en_echec(self, case, couleur): #verifie si une case vide sera en echecs si elle reçoit une piece de couleur couleur
         x,y = case[0], case[1]
@@ -362,28 +373,75 @@ class Plateau:
                 if (self.grille[i][j] != None and self.grille[i][j].getNom() != "pion" and self.grille[i][j].getCouleur() != couleur):
                     if((x,y) in self.coups_possibles((i,j))):
                         return True
-        if(couleur == "blanc"):
-            if(self.grille[x-1][y-1] != None and self.grille[x-1][y-1].getNom() == "pion" and self.grille[x-1][y-1].getCouleur() == "noir"):
+        # if(couleur == "blanc"):
+            if(-1< x-1 < 8 and -1< y-1 < 8 and self.grille[x-1][y-1] != None and self.grille[x-1][y-1].getNom() == "pion" and self.grille[x-1][y-1].getCouleur() != couleur):
                 return True
-            if(self.grille[x-1][y+1] != None and self.grille[x-1][y+1].getNom() == "pion" and self.grille[x-1][y+1].getCouleur() == "noir"):
+            if(-1< x-1 < 8 and -1< y+1 < 8 and self.grille[x-1][y+1] != None and self.grille[x-1][y+1].getNom() == "pion" and self.grille[x-1][y+1].getCouleur() != couleur):
                 return True
-        else:
-            if(self.grille[x+1][y-1] != None and self.grille[x+1][y-1].getNom() == "pion" and self.grille[x+1][y-1].getCouleur() == "blanc"):
-                return True
-            if(self.grille[x+1][y+1] != None and self.grille[x+1][y+1].getNom() == "pion" and self.grille[x+1][y+1].getCouleur() == "blanc"):
+        # else:
+        #     if(-1< x+1 < 8 and -1< y-1 < 8 and self.grille[x+1][y-1] != None and self.grille[x+1][y-1].getNom() == "pion" and self.grille[x+1][y-1].getCouleur() == "blanc"):
+        #         return True
+        #     if(-1< x+1 < 8 and -1< y+1 < 8 and self.grille[x+1][y+1] != None and self.grille[x+1][y+1].getNom() == "pion" and self.grille[x+1][y+1].getCouleur() == "blanc"):
+        #         return True
+        return False
+         
+    def contient_roi(self, list):
+        for i in range(len(list)):
+            if list[i][0].getNom() == "roi":
                 return True
         return False
-                    
-    def verif_echec_et_mat_blanc(self): #verifie si les blanc ont perdu
+    
+    def simule_coup(self, case, case2, couleur):
+        self.coup(case, case2)
+        echec = self.roi_en_echec(couleur)
+        self.annuler_coup()
+        return echec
+        
+    def verif_echec_et_mat_blanc(self): #verifie si les blancs ont perdu
+        list_blancs = []
         for i in range(8):
             for j in range(8):
-                if (self.grille[i][j] != None and self.grille[i][j].getNom() == "roi" and self.grille[i][j].getCouleur() == "blanc"):
-                    return
-        self.echec_et_mat_blanc = True
+                if (self.grille[i][j] != None and self.grille[i][j].getCouleur() == "blanc"):
+                    list_blancs.append((self.grille[i][j], (i,j)))
+        if not self.contient_roi(list_blancs):
+            self.echec_et_mat_blanc = True
+            return
+        else:
+            for i in range(len(list_blancs)):
+                piece, case = list_blancs[i][0], list_blancs[i][1]
+                list_coups = self.coups_possibles(case)
+                if piece.getNom() == "roi":
+                    self.enleve_cases_roi(list_coups, "blanc")
+                for case2 in list_coups:
+                    if not self.simule_coup(case, case2, "blanc"):
+                        return 
+            self.echec_et_mat_blanc = True
+            return
     
     def verif_echec_et_mat_noir(self): #verifie si les noirs ont perdu
+        list_noirs = []
         for i in range(8):
             for j in range(8):
-                 if (self.grille[i][j] != None and self.grille[i][j].getNom() == "roi" and self.grille[i][j].getCouleur() == "noir"):
-                    return
-        self.echec_et_mat_noir = True
+                if (self.grille[i][j] != None and self.grille[i][j].getCouleur() == "noir"):
+                    list_noirs.append((self.grille[i][j], (i,j)))
+        if not self.contient_roi(list_noirs):
+            self.echec_et_mat_noir = True
+            return
+        else:
+            for i in range(len(list_noirs)):
+                piece, case = list_noirs[i][0], list_noirs[i][1]
+                list_coups = self.coups_possibles(case)
+                if piece.getNom() == "roi":
+                    self.enleve_cases_roi(list_coups, "noir")
+                for case2 in list_coups:
+                    if not self.simule_coup(case, case2, "noir"):
+                        return 
+            self.echec_et_mat_noir = True
+            return
+        
+    def inverse_plateau(self):
+        new_grille = [[None for i in range(8)] for j in range(8)]
+        for i in range(8):
+            for j in range(8):
+                new_grille[i][j] = self.grille[7-i][7-j]
+        self.grille = new_grille

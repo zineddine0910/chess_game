@@ -9,6 +9,10 @@ class Plateau:
     echec_et_mat_blanc = False
     echec_et_mat_noir = False
     match_nul = False
+    roque_blanc_a_gauche = True
+    roque_blanc_a_droite = True
+    roque_noir_a_gauche = True
+    roque_noir_a_droite = True
     def __init__(self):
 
         # initialisation pieces blanches
@@ -39,8 +43,19 @@ class Plateau:
             self.grille[1][i] = Piece.Piece("pion", "noir")
             self.grille[6][i] = Piece.Piece("pion", "blanc")
 
-        # self.grille[6][6] = Piece.Piece("tour", "noir")
-        # self.grille[5][6] = Piece.Piece("roi", "blanc")
+        self.grille[7][5] = None
+        self.grille[7][6] = None
+
+        self.grille[7][3] = None
+        self.grille[7][2] = None
+        self.grille[7][1] = None
+
+        # self.grille[0][5] = None
+        # self.grille[0][6] = None
+
+        # self.grille[0][3] = None
+        # self.grille[0][2] = None
+        # self.grille[0][1] = None
         # print(self.case_vide_en_echec((4,6), "blanc"))
         # print(self.coups_possibles((6,6)))
         # self.grille[6][4] = None
@@ -235,6 +250,28 @@ class Plateau:
                             if self.grille[x][y].getCouleur() != self.grille[x+i][y+j].getCouleur():
                                 tab_coups.append((x + i, y + j))
 
+        
+        if self.grille[x][y].getCouleur() == "blanc":
+                if -1 < y+1 < 8 and self.grille[x][y+1] == None:
+                    if -1 < y+2 < 8 and self.grille[x][y+2] == None:
+                            if self.roque_blanc_a_droite:
+                                tab_coups.append((x,y+2))
+                if -1 < y-1 < 8 and self.grille[x][y-1] == None:
+                    if -1 < y-2 < 8 and self.grille[x][y-2] == None:
+                        if -1 < y-3 < 8 and self.grille[x][y-3] == None:
+                            if self.roque_blanc_a_gauche:
+                                tab_coups.append((x,y-3))
+        else:
+                if -1 < y-1 < 8 and self.grille[x][y-1] == None:
+                    if -1 < y-2 < 8 and self.grille[x][y-2] == None:
+                        if self.roque_noir_a_droite:
+                            tab_coups.append((x,y-2))
+                if -1 < y+1 < 8 and self.grille[x][y+1] == None:
+                    if -1 < y+2 < 8 and self.grille[x][y+2] == None:
+                        if -1 < y+3 < 8 and self.grille[x][y+3] == None:
+                            if self.roque_noir_a_gauche:
+                                tab_coups.append((x,y+3))
+
     def coups_possibles(self,case):
 
         # case vide
@@ -272,7 +309,62 @@ class Plateau:
 
 
     def coup(self,case1,case2):
+
+        if self.grille[case1[0]][case1[1]].getNom() == "roi" and case1[0] == 7:
+            if case2[1] != case1[1]+2 or case2[1] != case1[1]-3 or case2[1] != case1[1]-2 or case2[1] != case1[1]+3 :    
+                if self.grille[case1[0]][case1[1]].getCouleur() == "blanc":
+                    self.roque_blanc_a_droite = False
+                    self.roque_blanc_a_gauche = False
+                else:
+                    self.roque_noir_a_droite = False
+                    self.roque_noir_a_gauche = False
+
+            if self.grille[case1[0]][case1[1]].getNom() == "tour":
+                if self.grille[case1[0]][case1[1]].getCouleur() == "blanc":
+                    if case1[1] == 7:
+                        self.roque_blanc_a_droite = False
+                    elif case1[1] == 0:
+                        self.roque_blanc_a_gauche = False
+                else:
+                    if case1[1] == 7:
+                        self.roque_noir_a_droite = False
+                    elif case1[1] == 0: 
+                        self.roque_noir_a_gauche = False
         
+        if self.grille[case1[0]][case1[1]].getNom() == "roi":
+            if case2[1] == case1[1]+2:
+                piece_case2 = self.grille[case2[0]][case2[1]]
+                self.historique.append((case1, case2, piece_case2))
+                self.grille[case2[0]][case2[1]] = self.grille[case1[0]][case1[1]]
+                self.grille[case1[0]][case1[1]] = None
+                self.grille[case1[0]][case1[1]+1] = self.grille[case1[0]][case1[1]+3]
+                self.grille[case1[0]][case1[1]+3] = None
+                return
+            elif case2[1] == case1[1]-3:
+                piece_case2 = self.grille[case2[0]][case2[1]]
+                self.historique.append((case1, case2, piece_case2))
+                self.grille[case2[0]][case2[1]] = self.grille[case1[0]][case1[1]]
+                self.grille[case1[0]][case1[1]] = None
+                self.grille[case1[0]][case1[1]-2] = self.grille[case1[0]][case1[1]-4]
+                self.grille[case1[0]][case1[1]-4] = None
+                return
+            elif case2[1] == case1[1]-2:
+                piece_case2 = self.grille[case2[0]][case2[1]]
+                self.historique.append((case1, case2, piece_case2))
+                self.grille[case2[0]][case2[1]] = self.grille[case1[0]][case1[1]]
+                self.grille[case1[0]][case1[1]] = None
+                self.grille[case1[0]][case1[1]-1] = self.grille[case1[0]][case1[1]-3]
+                self.grille[case1[0]][case1[1]-3] = None
+                return
+            elif case2[1] == case1[1]+3:
+                piece_case2 = self.grille[case2[0]][case2[1]]
+                self.historique.append((case1, case2, piece_case2))
+                self.grille[case2[0]][case2[1]] = self.grille[case1[0]][case1[1]]
+                self.grille[case1[0]][case1[1]] = None
+                self.grille[case1[0]][case1[1]+2] = self.grille[case1[0]][case1[1]+4]
+                self.grille[case1[0]][case1[1]+4] = None
+                return
+            
         piece_case2 = self.grille[case2[0]][case2[1]]
         self.historique.append((case1, case2, piece_case2))
         self.grille[case2[0]][case2[1]] = self.grille[case1[0]][case1[1]]
@@ -374,9 +466,9 @@ class Plateau:
                     if((x,y) in self.coups_possibles((i,j))):
                         return True
         # if(couleur == "blanc"):
-            if(-1< x-1 < 8 and -1< y-1 < 8 and self.grille[x-1][y-1] != None and self.grille[x-1][y-1].getNom() == "pion" and self.grille[x-1][y-1].getCouleur() != couleur):
+            if(-1 < x-1 < 8 and -1 < y-1 < 8 and self.grille[x-1][y-1] != None and self.grille[x-1][y-1].getNom() == "pion" and self.grille[x-1][y-1].getCouleur() != couleur):
                 return True
-            if(-1< x-1 < 8 and -1< y+1 < 8 and self.grille[x-1][y+1] != None and self.grille[x-1][y+1].getNom() == "pion" and self.grille[x-1][y+1].getCouleur() != couleur):
+            if(-1 < x-1 < 8 and -1 < y+1 < 8 and self.grille[x-1][y+1] != None and self.grille[x-1][y+1].getNom() == "pion" and self.grille[x-1][y+1].getCouleur() != couleur):
                 return True
         # else:
         #     if(-1< x+1 < 8 and -1< y-1 < 8 and self.grille[x+1][y-1] != None and self.grille[x+1][y-1].getNom() == "pion" and self.grille[x+1][y-1].getCouleur() == "blanc"):

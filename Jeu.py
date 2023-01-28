@@ -80,7 +80,16 @@ def main():
                                 #     grille.annuler_coup()
                                 #     print("coup annulé")
                                 # else:
-                                #     joueur_actuel = "blanc"   
+                                #     joueur_actuel = "blanc"  
+                                if grille.roque_blanc_a_gauche and grille.roque_blanc_a_droite:
+                                    print ("roque possible blanc")
+                                elif grille.roque_blanc_a_gauche == True:
+                                    print ("roque possible blanc gauche")
+                                elif grille.roque_blanc_a_droite == True:
+                                    print ("roque possible blanc droite")
+                                else:
+                                    print ("roque plus possible")
+
                         else: print("jamais")
                         choix = []
                         case1 = None
